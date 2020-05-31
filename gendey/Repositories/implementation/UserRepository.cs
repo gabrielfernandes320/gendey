@@ -10,16 +10,18 @@ namespace gendey.Repositories.implementation
 {
     public class UserRepository : IGendeyRepository<User>
     {
-        readonly gendeyContext _gendeyContext;
+        readonly gendeyContext _gendeyContext; 
+        readonly IAuthRepository<User> _authRepository;
 
-        public UserRepository(gendeyContext context)
+        public UserRepository(gendeyContext context, IAuthRepository<User> authRepository)
         {
             _gendeyContext = context;
+            _authRepository = authRepository;
         }
 
-        public async Task<User> GetAll()
+        public async Task<IEnumerable<User>> GetAll()
         {
-            return await _gendeyContext.User.FindAsync(4);
+            return await _gendeyContext.User.ToListAsync();
         }
 
         public async Task<User> Get(int id)
@@ -52,7 +54,10 @@ namespace gendey.Repositories.implementation
 
         public async Task<User> Add(object obj)
         {
-            _gendeyContext.User.Add((User)obj);
+            var user = (User) obj;
+            user.Password = _authRepository.GetEncryptedPassword(user.Password);
+
+            _gendeyContext.User.Add(user);
 
             try
             {

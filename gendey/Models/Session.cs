@@ -10,6 +10,7 @@ namespace gendey.Models
         public DateTime AuthDate { get; set; }
         public string LastToken { get; set; }
         public DateTime TokenRefreshDate { get; set; }
+        public string RefreshTokenCode { get; set; }
 
         public virtual User User { get; set; }
     }

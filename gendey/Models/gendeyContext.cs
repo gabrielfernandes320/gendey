@@ -331,6 +331,10 @@ namespace gendey.Models
             {
                 entity.ToTable("session");
 
+                entity.HasIndex(e => e.RefreshTokenCode)
+                    .HasName("session_refresh_token_code_uindex")
+                    .IsUnique();
+
                 entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.AuthDate)
@@ -340,6 +344,11 @@ namespace gendey.Models
                 entity.Property(e => e.LastToken)
                     .IsRequired()
                     .HasColumnName("last_token")
+                    .HasColumnType("character varying");
+
+                entity.Property(e => e.RefreshTokenCode)
+                    .IsRequired()
+                    .HasColumnName("refresh_token_code")
                     .HasColumnType("character varying");
 
                 entity.Property(e => e.TokenRefreshDate)
@@ -385,10 +394,6 @@ namespace gendey.Models
                     .HasName("user_id_uindex")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Name)
-                    .HasName("user_name_uindex")
-                    .IsUnique();
-
                 entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.Active).HasColumnName("active");
@@ -422,7 +427,8 @@ namespace gendey.Models
 
                 entity.Property(e => e.RegisterDate)
                     .HasColumnName("register_date")
-                    .HasColumnType("date");
+                    .HasColumnType("date")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                 entity.Property(e => e.RoleId).HasColumnName("role_id");
 

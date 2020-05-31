@@ -7,7 +7,7 @@ namespace gendey.Repositories.contract
 {
     public interface IGendeyRepository<T>
     {
-        Task<T> GetAll();
+        Task<IEnumerable<T>> GetAll();
 
         Task<T> Get(int id);
 
