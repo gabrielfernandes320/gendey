@@ -62,7 +62,7 @@ namespace gendey
                     };
                 });
 
-            services.AddDbContext<gendeyContext>(op => op.UseNpgsql("Host=localhost;Database=gendey;Username=postgres;Password=admin"));
+            services.AddDbContext<gendeyContext>(op => op.UseNpgsql("Host=localhost;Database=postgres;Username=postgres;Password=admin"));
             services.AddScoped<IGendeyRepository<User>, UserRepository>();
             services.AddScoped<IAuthRepository<User>, AuthRepository>();
         }

@@ -1,0 +1,262 @@
+create schema gendey;
+
+alter schema gendey owner to postgres;
+
+create table if not exists city
+(
+	id integer not null
+		constraint city_pkey
+			primary key,
+	name varchar,
+	ibge_code integer,
+	uf varchar
+);
+
+alter table city owner to postgres;
+
+create table if not exists role
+(
+	id serial not null
+		constraint roles_pk
+			primary key,
+	name varchar not null
+);
+
+comment on table role is 'Identificadores de role';
+
+alter table role owner to postgres;
+
+create unique index if not exists roles_id_uindex
+	on role (id);
+
+create unique index if not exists roles_name_uindex
+	on role (name);
+
+create table if not exists services
+(
+	id serial not null
+		constraint expertise_pk
+			primary key,
+	name varchar not null
+);
+
+comment on table services is 'expertises medicas';
+
+alter table services owner to postgres;
+
+create unique index if not exists expertise_id_uindex
+	on services (id);
+
+create unique index if not exists expertise_name_uindex
+	on services (name);
+
+create table if not exists adress
+(
+	id serial not null
+		constraint adress_pk
+			primary key,
+	fk_city integer not null
+		constraint adress_city_fk
+			references city,
+	nbhood varchar(40),
+	street varchar(40),
+	num integer,
+	complement varchar(100),
+	postalcode integer,
+	register_date date not null
+);
+
+comment on table adress is 'endereço do usuário';
+
+alter table adress owner to postgres;
+
+create unique index if not exists adress_id_uindex
+	on adress (id);
+
+create table if not exists contact
+(
+	id serial not null
+		constraint contact_pk
+			primary key,
+	name varchar not null,
+	fone varchar(16),
+	fone2 varchar(16),
+	name_alt varchar,
+	fone_alt varchar(16),
+	register_date date not null
+);
+
+comment on table contact is 'contact de usuário';
+
+alter table contact owner to postgres;
+
+create unique index if not exists contact_id_uindex
+	on contact (id);
+
+create table if not exists conf_attendant
+(
+	id serial not null
+		constraint conf_medic_pk
+			primary key,
+	fk_services integer not null
+		constraint conf_medic_expertise_id_fk
+			references services,
+	start_time time not null,
+	end_time time not null,
+	consult_time integer not null,
+	price integer not null,
+	register_date date not null
+);
+
+comment on table conf_attendant is 'Attendant configurations';
+
+alter table conf_attendant owner to postgres;
+
+create unique index if not exists conf_medic_id_uindex
+	on conf_attendant (id);
+
+create table if not exists conf_client
+(
+	id serial not null
+		constraint conf_patient_pk
+			primary key,
+	register_date date
+);
+
+comment on table conf_client is 'Configurações do paciente';
+
+alter table conf_client owner to postgres;
+
+create unique index if not exists conf_patient_id_uindex
+	on conf_client (id);
+
+create table if not exists "user"
+(
+	id serial not null
+		constraint user_pk
+			primary key,
+	role_id integer not null
+		constraint user_roles_id_fk
+			references role,
+	email varchar not null,
+	password varchar not null,
+	name varchar not null,
+	birthdate date not null,
+	active boolean not null,
+	fk_contact integer not null
+		constraint user_contact_fk
+			references contact,
+	fk_adress integer not null
+		constraint user_adress_fk
+			references adress,
+	fk_conf_client integer
+		constraint user_conf_patient_id_fk
+			references conf_client,
+	fk_conf_attendant integer
+		constraint user_conf_medic_fk
+			references conf_attendant,
+	register_date date not null
+);
+
+comment on table "user" is 'Login e fk''s';
+
+alter table "user" owner to postgres;
+
+create unique index if not exists user_id_uindex
+	on "user" (id);
+
+create unique index if not exists user_email_uindex
+	on "user" (email);
+
+create unique index if not exists user_fk_confmedico_uindex
+	on "user" (fk_conf_attendant);
+
+create unique index if not exists user_fk_confpaciente_uindex
+	on "user" (fk_conf_client);
+
+create unique index if not exists user_fk_contact_uindex
+	on "user" (fk_contact);
+
+create unique index if not exists user_fk_adress_uindex
+	on "user" (fk_adress);
+
+create unique index if not exists user_name_uindex
+	on "user" (name);
+
+create table if not exists schedule
+(
+	id serial not null
+		constraint schedule_pk
+			primary key,
+	attendant_id integer not null
+		constraint schedule_user_doctor_id_fk
+			references "user",
+	client_id integer not null
+		constraint schedule_user_patient_id_fk
+			references "user",
+	start_time time not null,
+	end_time time not null,
+	price money,
+	canceled boolean,
+	canceled_reason varchar,
+	appointment_date date not null,
+	register_date date not null,
+	observation text
+);
+
+alter table schedule owner to postgres;
+
+create unique index if not exists schedule_id_uindex
+	on schedule (id);
+
+create table if not exists attendantservice_rel
+(
+	id serial not null
+		constraint docsec_rel_pk
+			primary key,
+	service_id integer
+		constraint docsec_rel_user_sec_id_fk
+			references "user",
+	attendant_id integer
+		constraint docsec_rel_user_doc_id_fk
+			references "user"
+);
+
+comment on table attendantservice_rel is 'Relation between attendant and his services';
+
+alter table attendantservice_rel owner to postgres;
+
+create unique index if not exists docsec_rel_id_uindex
+	on attendantservice_rel (id);
+
+create table if not exists schedule_config
+(
+	id serial not null
+		constraint schedules_config_pk
+			primary key,
+	user_id integer
+		constraint schedules_config_user_id_fk
+			references "user",
+	start_time time,
+	end_time time,
+	duration integer,
+	day_of_week integer
+);
+
+alter table schedule_config owner to postgres;
+
+create table if not exists session
+(
+	id serial not null
+		constraint session_pk
+			primary key,
+	user_id integer not null
+		constraint session_user_id_fk
+			references "user",
+	auth_date date not null,
+	last_token varchar not null,
+	token_refresh_date date not null
+);
+
+alter table session owner to postgres;
+
