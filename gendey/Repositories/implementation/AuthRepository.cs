@@ -37,7 +37,7 @@ namespace gendey.Repositories.implementation
             var dbUser = await GetUser(user);
 
             if (dbUser == null)
-                return false;
+                return null;
 
             if (!IsAuthenticated(dbUser.Password, password)) return null;
            

@@ -55,6 +55,7 @@ namespace gendey.Repositories.implementation
         public async Task<User> Add(object obj)
         {
             var user = (User) obj;
+            user.RegisterDate = DateTime.Now;
             user.Password = _authRepository.GetEncryptedPassword(user.Password);
 
             _gendeyContext.User.Add(user);
