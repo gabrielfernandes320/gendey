@@ -56,6 +56,8 @@ namespace gendey.Repositories.implementation
         {
             var user = (User) obj;
             user.RegisterDate = DateTime.Now;
+            user.FkAdressNavigation.RegisterDate = DateTime.Now;
+            user.FkContactNavigation.RegisterDate = DateTime.Now;
             user.Password = _authRepository.GetEncryptedPassword(user.Password);
 
             _gendeyContext.User.Add(user);
